@@ -31,9 +31,6 @@ class my_DT:
                 pi = stats[i]/N
                 base = base + (pi**2)
             impure = 1-base 
-
-
-
         elif self.criterion == "entropy":
             # Implement entropy impurity
             base = 0
@@ -43,9 +40,6 @@ class my_DT:
                 total = (pi*np.log2(pi))
                 base = base+total;
             impure = -base
-            
-
-
         else:
             raise Exception("Unknown criterion.")
         return impure
@@ -78,14 +72,8 @@ class my_DT:
                     impure = (self.impurity(left)*len(left)) + self.impurity(right)*len(right)
                     best_feature = [feature, (self.impurity(left)*len(left)) + self.impurity(right)*len(right), cans[i],
                                     [left_indices, right_indices],
-                                    [(self.impurity(left)*len(left)), (self.impurity(right)*len(right))]]
-                
-                
-                
+                                    [(self.impurity(left)*len(left)), (self.impurity(right)*len(right))]]            
         return best_feature
-                
-        
-
     def fit(self, X, y):
         # X: pd.DataFrame, independent variables, float
         # y: list, np.array or pd.Series, dependent variables, int or str
