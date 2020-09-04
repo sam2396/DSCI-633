@@ -76,7 +76,8 @@ class my_DT:
                         right_indices.append(pop[j])
                 if((self.impurity(left)*len(left)) + self.impurity(right)*len(right)<impure):
                     impure = (self.impurity(left)*len(left)) + self.impurity(right)*len(right)
-                    best_feature = [feature, (self.impurity(left)*len(left)) + self.impurity(right)*len(right), cans[i], [left_indices, right_indices],
+                    best_feature = [feature, (self.impurity(left)*len(left)) + self.impurity(right)*len(right), cans[i],
+                                    [left_indices, right_indices],
                                     [(self.impurity(left)*len(left)), (self.impurity(right)*len(right))]]
                 
                 
