@@ -74,9 +74,9 @@ class my_KNN:
         # Output: Counter(labels of the self.n_neighbors nearest neighbors)
         distances = self.dist(x)
         sortedDistances = np.argsort(distances)
-        FiveBestDistances = sortedDistances[:5]
+        BestDistances = sortedDistances[:self.n_neighbors]
         BestDistancesLabels = []
-        for label in FiveBestDistances:
+        for label in BestDistances:
             BestDistancesLabels.append(self.y[label])
         output = Counter(BestDistancesLabels)
         return output
