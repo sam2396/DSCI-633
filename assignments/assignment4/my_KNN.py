@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 from collections import Counter
+from math import sqrt
 
-class my_KNN_hint:
+
+class my_KNN:
 
     def __init__(self, n_neighbors=5, metric="minkowski", p=2):
         # metric = {"minkowski", "euclidean", "manhattan", "cosine"}
@@ -24,29 +26,45 @@ class my_KNN_hint:
     def dist(self,x):
         # Calculate distances of training data to a single input data point (np.array)
         if self.metric == "minkowski":
-            finaldist1 = np.empty
+            mainArray = np.empty
             c = np.array(self.X)
             for i in range(len(c)):
                 dist = (sum((abs(c[i]-x))**self.p))**(1/self.p)
-                finaldist1 = np.append(finaldist1,dist)
-                #Final minkowski distance  
-            finaldist1 = np.delete(finaldist1,[0])
-            distances = finaldist1
+                mainArray = np.append(mainArray,dist)
+                #Final Minkowski distance  
+            mainArray = np.delete(mainArray,[0])
+            distances = mainArray
             return distances
-
-
         elif self.metric == "euclidean":
-            distances = "write your own code"
-
-
+            mainArray = np.empty
+            c = np.array(self.X)
+            for i in range(len(c)):
+                dist = (sum((abs(c[i]-x))**self.p))**(1/self.p)
+                mainArray = np.append(mainArray,dist)
+                #Final Minkowski distance  
+            mainArray = np.delete(mainArray,[0])
+            distances = mainArray
+            return distances
         elif self.metric == "manhattan":
-            distances = "write your own code"
-
-
+            mainArray = np.empty
+            c = np.array(self.X)
+            for i in range(len(c)):
+                dist = (sum((abs(c[i]-x))))
+                mainArray = np.append(mainArray,dist)
+                #Final Manhattan distance  
+            mainArray = np.delete(mainArray,[0])
+            distances = mainArray
+            return distances
         elif self.metric == "cosine":
-            distances = "write your own code"
-
-
+            mainArray = np.empty
+            c = np.array(self.X)
+            for i in range(len(c)):
+                dist = (sum(c[i]*x))/(sqrt(sum(c[i]**2))*sqrt(sum(x**2)))
+                mainArray = np.append(mainArray,[0])
+                #Final Cosine distance
+            mainArray = np.delete(mainArray,[0])    
+            distances = mainArray
+            return distances
         else:
             raise Exception("Unknown criterion.")
         return distances
@@ -55,20 +73,13 @@ class my_KNN_hint:
         # Return the stats of the labels of k nearest neighbors to a single input data point (np.array)
         # Output: Counter(labels of the self.n_neighbors nearest neighbors)
         distances = self.dist(x)
-        
-        #distances2 = np.sort(distances)
-        #distances3 = distances2[:5]
-        p1 = np.argsort(distances)
-        p2 = p1[:5]
-        p3 = []
-        for i in p2:
-            p3.append(self.y[i])
-        output1 = Counter(p3)
-        #output = distances3
-
-
-
-        return output1
+        sortedDistances = np.argsort(distances)
+        FiveBestDistances = sortedDistances[:5]
+        BestDistancesLabels = []
+        for label in FiveBestDistances:
+            BestDistancesLabels.append(self.y[label])
+        output = Counter(BestDistancesLabels)
+        return output
 
     def predict(self, X):
         # X: pd.DataFrame, independent variables, float
