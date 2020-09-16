@@ -57,7 +57,7 @@ class my_KNN:
             c = np.array(self.X)
             for i in range(len(c)):
                 dist = (sum(c[i]*x))/(sqrt(sum(c[i]**2))*(sqrt(sum(x**2))))
-                mainArray = np.append(mainArray,dist)
+                mainArray = np.append(mainArray,1-dist)
             mainArray = np.delete(mainArray,[0])    
             distances = mainArray
             return distances
@@ -99,6 +99,3 @@ class my_KNN:
             probs.append({key: neighbors[key] / float(self.n_neighbors) for key in self.classes_})
         probs = pd.DataFrame(probs, columns=self.classes_)
         return probs
-
-
-
