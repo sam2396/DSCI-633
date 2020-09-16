@@ -31,7 +31,6 @@ class my_KNN:
             for i in range(len(c)):
                 dist = (sum((abs(c[i]-x))**self.p))**(1/self.p)
                 mainArray = np.append(mainArray,dist)
-                #Final Minkowski distance  
             mainArray = np.delete(mainArray,[0])
             distances = mainArray
             return distances
@@ -41,7 +40,6 @@ class my_KNN:
             for i in range(len(c)):
                 dist = (sum((abs(c[i]-x))**2))**(1/2)
                 mainArray = np.append(mainArray,dist)
-                #Final Minkowski distance  
             mainArray = np.delete(mainArray,[0])
             distances = mainArray
             return distances
@@ -51,7 +49,6 @@ class my_KNN:
             for i in range(len(c)):
                 dist = (sum((abs(c[i]-x))))
                 mainArray = np.append(mainArray,dist)
-                #Final Manhattan distance  
             mainArray = np.delete(mainArray,[0])
             distances = mainArray
             return distances
@@ -59,9 +56,8 @@ class my_KNN:
             mainArray = np.empty
             c = np.array(self.X)
             for i in range(len(c)):
-                dist = (sum(c[i]*x))/(sqrt(sum(c[i]**2))*sqrt(sum(x**2)))
-                mainArray = np.append(mainArray,[0])
-                #Final Cosine distance
+                dist = (sum(c[i]*x))/(sqrt(sum(c[i]**2))*(sqrt(sum(x**2))))
+                mainArray = np.append(mainArray,dist)
             mainArray = np.delete(mainArray,[0])    
             distances = mainArray
             return distances
