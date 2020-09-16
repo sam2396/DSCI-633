@@ -39,7 +39,7 @@ class my_KNN:
             mainArray = np.empty
             c = np.array(self.X)
             for i in range(len(c)):
-                dist = (sum((abs(c[i]-x))**self.p))**(1/self.p)
+                dist = (sum((abs(c[i]-x))**2))**(1/2)
                 mainArray = np.append(mainArray,dist)
                 #Final Minkowski distance  
             mainArray = np.delete(mainArray,[0])
