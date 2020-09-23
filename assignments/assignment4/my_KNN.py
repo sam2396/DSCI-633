@@ -97,5 +97,7 @@ class my_KNN:
         for x in X_feature.to_numpy():
             neighbors = self.k_neighbors(x)
             probs.append({key: neighbors[key] / float(self.n_neighbors) for key in self.classes_})
+        print(probs)
         probs = pd.DataFrame(probs, columns=self.classes_)
+        print(probs)
         return probs
