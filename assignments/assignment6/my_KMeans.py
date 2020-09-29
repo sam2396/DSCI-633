@@ -51,9 +51,10 @@ class my_KMeans:
                 for i in range(len(X)):
                     for j in range(len(finalClusterdata)):
                         temp = self.dist(X[i],finalClusterdata[j])
-                        kdist.append(temp)
-                        if(temp==np.max(kdist)):
-                            minIndice = i           
+                        if(i not in kdistIndice):
+                            kdist.append(temp)
+                            if(temp==np.max(kdist)):
+                                minIndice = i           
                 kdistIndice.append(minIndice)
                 finalClusterdata.append(X[minIndice])    
             cluster_centers = finalClusterdata
@@ -90,7 +91,8 @@ class my_KMeans:
             # Update cluster centers
             v = []
             for i in clusters:
-                v.append(list(np.mean(i,axis=0)))
+                r = list((np.mean(i,axis=0)))
+                v.append(np.array(r))
             cluster_centers = v
 
 
