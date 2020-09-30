@@ -45,18 +45,14 @@ class my_KMeans:
             for i in range(len(b)):
                 finalClusterdata.append(c[i])
             minIndice = 0
-            kdistIndice = []
+            kdistIndice = list()
             for o in range(self.n_clusters-1):
-                kdist = list()
-                for i in range(len(X)):
-                    for j in range(len(finalClusterdata)):
-                        temp = self.dist(X[i],finalClusterdata[j])
-                        if(i not in kdistIndice):
-                            kdist.append(temp)
-                            if(temp==np.max(kdist)):
-                                minIndice = i           
+                kdist = [np.min([self.dist(x,j) for j in finalClusterdata])**2 for x in X]
+                min1 = kdist/np.sum(kdist)
+                minIndice = np.random.choice(X.shape[0],1,p=min1)   
                 kdistIndice.append(minIndice)
-                finalClusterdata.append(X[minIndice])    
+            for i in kdistIndice:    
+                finalClusterdata.extend(X[i])   
             cluster_centers = finalClusterdata
 
         else:
