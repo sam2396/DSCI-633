@@ -52,7 +52,7 @@ class my_KMeans:
                 minIndice = np.random.choice(X.shape[0],1,p=min1)   
                 kdistIndice.append(minIndice)
             for i in kdistIndice:    
-                finalClusterdata.extend(X[i])   
+                finalClusterdata.extend(list(X[i]))   
             cluster_centers = finalClusterdata
 
         else:
