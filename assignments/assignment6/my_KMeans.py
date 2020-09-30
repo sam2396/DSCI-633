@@ -85,9 +85,9 @@ class my_KMeans:
             if (last_inertia and last_inertia - inertia < self.tol) or i==self.max_iter:
                 break
             # Update cluster centers
-            v = []
+            v = []      
             for i in clusters:
-                r = list((np.mean(i,axis=0)))
+                r = np.mean(i,axis=0)
                 v.append(np.array(r))
             cluster_centers = v
 
