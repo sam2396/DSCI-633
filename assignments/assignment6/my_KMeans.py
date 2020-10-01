@@ -52,7 +52,7 @@ class my_KMeans:
                 minIndice = np.random.choice(X.shape[0],1,p=min1)   
                 kdistIndice.append(minIndice)
             for i in kdistIndice:    
-                finalClusterdata.extend(list(X[i]))   
+                finalClusterdata.extend(list(X[i]))  
             cluster_centers = finalClusterdata
 
         else:
@@ -120,7 +120,7 @@ class my_KMeans:
     def predict(self, X):
         # X: pd.DataFrame, independent variables, float
         # return predictions: list
-        predictions = [np.argmax(dist) for dist in self.transform(X)]
+        predictions = [np.argmin(dist) for dist in self.transform(X)]
         return predictions
 
 
