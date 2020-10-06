@@ -23,7 +23,7 @@ def vector_norm(x, norm="Min-Max"):
     if norm == "Min-Max":
         x_norm = (x-np.min(x))/(np.max(x)-np.min(x))
     elif norm == "L1":
-        x_norm = x/(np.sum(x))
+        x_norm = x/(np.sum(abs(x)))
     elif norm == "L2":
         x_norm = x/np.sqrt(np.sum(x**2))
     elif norm == "Standard_Score":
@@ -32,7 +32,7 @@ def vector_norm(x, norm="Min-Max"):
         raise Exception("Unknown normlization.")
     return x_norm
 
-def normalize(X, norm="Min-Max", axis = 1):
+def normalize(X, norm="Standard_Score", axis = 1):
     #  Inputs:
     #     X: input matrix
     #     norm = {"L1", "L2", "Min-Max", "Standard_Score"}
