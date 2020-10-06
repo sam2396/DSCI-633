@@ -27,7 +27,7 @@ def vector_norm(x, norm="Min-Max"):
     elif norm == "L2":
         x_norm = x/np.sqrt(np.sum(x**2))
     elif norm == "Standard_Score":
-        x_norm = (x-np.mean(x)/np.std(x))
+        x_norm = ((x-np.mean(x))/np.std(x))
     else:
         raise Exception("Unknown normlization.")
     return x_norm
