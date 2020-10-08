@@ -1,4 +1,4 @@
-import my_preprocess_hint
+import my_preprocess
 import pandas as pd
 from collections import Counter
 from sklearn.tree import DecisionTreeClassifier
@@ -13,14 +13,14 @@ if __name__ == "__main__":
     X = data_train[independent]
     y = data_train["Species"]
     # Preprocess (train)
-    X_norm = my_preprocess_hint.normalize(X)
-    principal_components = my_preprocess_hint.pca(X_norm, n_components=2)
+    X_norm = my_preprocess.normalize(X)
+    principal_components = my_preprocess.pca(X_norm, n_components=2)
     X_pca = X_norm.dot(principal_components)
-    sample = my_preprocess_hint.stratified_sampling(y, ratio=0.5, replace=False)
+    sample = my_preprocess.stratified_sampling(y, ratio=0.5, replace=False)
 
     X_sample = X_pca[sample]
     y_sample = y[sample].to_numpy()
-    print(X_sample)
+    print(X_pca)
     print(Counter(y_sample))
     print(Counter(y))
     # Fit model
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     data_test = pd.read_csv("../data/Iris_test.csv")
     X_test = data_test[independent]
     # Preprocess (test)
-    X_test_norm = my_preprocess_hint.normalize(X_test)
+    X_test_norm = my_preprocess.normalize(X_test)
     X_test_pca = X_test_norm.dot(principal_components)
     # Predict
     predictions = clf.predict(X_test_pca)
