@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Counter
 
-class my_evaluation_hint:
+class my_evaluation:
     # Binary class or multi-class classification evaluation
     # Each data point can only belong to one class
 
@@ -170,11 +170,13 @@ class my_evaluation_hint:
                 for i in order:
                     if self.actuals[i] == target:
                         tp = tp+1
-                        tpr = float(tp)/float(fn)
+                        fn = fn-1
+                        tpr = float(tp)/float(tp+fn)
                     else:
                         fp = fp+1
+                        tn = tn-1
                         pre_fpr = fpr
-                        fpr = float(fp)/float(tn)
+                        fpr = float(fp)/float(fp+tn)
                         auc_target = auc_target + (tpr * (fpr-pre_fpr))
             else:
                 raise Exception("Unknown target class.")

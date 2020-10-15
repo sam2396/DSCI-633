@@ -1,4 +1,4 @@
-from my_evaluation_hint import my_evaluation_hint
+from my_evaluation import my_evaluation
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     probs = clf.predict_proba(X)
     probs = pd.DataFrame({key: probs[:, i] for i, key in enumerate(clf.classes_)})
     # Evaluate results
-    metrics = my_evaluation_hint(predictions, y, probs)
+    metrics = my_evaluation(predictions, y, probs)
     result = {}
     for target in clf.classes_:
         result[target] = {}
