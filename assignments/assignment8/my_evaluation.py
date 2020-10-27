@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Counter
+from pdb import set_trace
 
 class my_evaluation:
     # Binary class or multi-class classification evaluation
@@ -25,27 +26,13 @@ class my_evaluation:
         # no return variables
         # write your own code below
         correct = self.predictions == self.actuals
-        wrong = self.predictions != self.actuals
         self.acc = float(Counter(correct)[True])/len(correct)
         self.confusion_matrix = {}
         for label in self.classes_:
-            a = []
-            b = []
-            a.append(self.predictions == label)
-            b.append(self.actuals == label)
-            tp = 0
-            tn = 0
-            fn = 0
-            fp = 0
-            for i in range(len(a[0])):
-                if(a[0][i] == b[0][i] & a[0][i] == True):
-                    tp = tp+1
-                if(a[0][i] == b[0][i] & a[0][i] == False):
-                    tn = tn+1
-                if(a[0][i] != b[0][i] & b[0][i] == False):
-                    fp = fp+1
-                if(a[0][i] != b[0][i] & b[0][i] == True):
-                    fn = fn+1  
+            tp = Counter(correct & (self.predictions == label))[True]
+            fp = Counter((self.actuals != label) & (self.predictions == label))[True]
+            tn = Counter(correct & (self.predictions != label))[True]
+            fn = Counter((self.actuals == label) & (self.predictions != label))[True]
             self.confusion_matrix[label] = {"TP":tp, "TN": tn, "FP": fp, "FN": fn}
         return
 
@@ -129,27 +116,16 @@ class my_evaluation:
                         raise Exception("Unknown type of average.")
                     rec += rec_label * ratio
         return rec
-        #rec = (self.confusion_matrix[target]['TP'])/(self.confusion_matrix[target]['TP']+self.confusion_matrix[target]['FN'])
-        #return rec
 
     def f1(self, target=None, average = "macro"):
         # compute f1
         # target: target class (str). If not None, then return f1 of target class
         # average: {"macro", "micro", "weighted"}. If target==None, return average f1
-        # output: f1 = float  
-        if(target == None):
-            if(average == "micro"):
-                return self.accuracy()
-            else:
-                a=0
-                for target in self.classes_:
-                    a = a + self.f1(target = target,average = average)
-                return a/3
-        prec = self.precision(target,average)
-        rec = self.recall(target,average)
-        #prec = self.confusion_matrix[target]['TP']/(self.confusion_matrix[target]['TP']+self.confusion_matrix[target]['FP'])
-        #rec = self.confusion_matrix[target]['TP']/(self.confusion_matrix[target]['TP']+self.confusion_matrix[target]['FN'])
-        f1_score =2 * ((prec * rec)/(prec + rec))
+        # output: f1 = float
+
+        prec = self.precision(target = target, average=average)
+        rec = self.recall(target = target, average=average)
+        f1_score = 2.0 * prec * rec / (prec + rec)
         return f1_score
 
     def auc(self, target):
@@ -169,15 +145,15 @@ class my_evaluation:
                 auc_target = 0
                 for i in order:
                     if self.actuals[i] == target:
-                        tp = tp+1
-                        fn = fn-1
-                        tpr = float(tp)/float(tp+fn)
+                        tp+=1
+                        fn-=1
+                        tpr = float(tp) / (tp + fn)
                     else:
-                        fp = fp+1
-                        tn = tn-1
+                        fp+=1
+                        tn-=1
                         pre_fpr = fpr
-                        fpr = float(fp)/float(fp+tn)
-                        auc_target = auc_target + (tpr * (fpr-pre_fpr))
+                        fpr = float(fp) / (tn + fp)
+                        auc_target += tpr * (fpr - pre_fpr)
             else:
                 raise Exception("Unknown target class.")
 
