@@ -1,21 +1,25 @@
 import numpy as np
 import pandas as pd
+from pdb import set_trace
+import random
+
 
 
 class my_GA:
     # Tuning with Genetic Algorithm for model parameters
 
-    def __init__(self, model, data_X, data_y, decision_boundary, obj_func, generation_size=100, selection_rate=0.5, mutation_rate=0.01, crossval_fold=5, max_generation=100, max_life=3):
+    def __init__(self, model, data_X, data_y, decision_boundary, obj_func, generation_size=100, selection_rate=0.5,
+                 mutation_rate=0.01, crossval_fold=5, max_generation=100, max_life=3):
         # inputs:
         # model: class object of the learner under tuning, e.g. my_DT
         # data_X: training data independent variables (pd.Dataframe)
         # data_y: training data dependent variables (pd.Series or list)
         # decision_boundary: list of boundaries of each decision variable,
-        # obj_func: generate objectives, all objectives are higher the better
         # e.g. decision_boundary = [("gini", "entropy"), [1, 16], [0, 0.1]] for my_DT means:
         # the first argument criterion can be chosen as either "gini" or "entropy"
         # the second argument max_depth can be any number 1 <= max_depth < 16
         # the third argument min_impurity_decrease can be any number 0 <= min_impurity_decrease < 0.1
+        # obj_func: generate objectives, all objectives are higher the better
         # generation_size: number of points in each generation
         # selection_rate: percentage of survived points after selection, only affect single objective
         # mutation_rate: probability of being mutated for each decision in each point
@@ -28,7 +32,7 @@ class my_GA:
         self.decision_boundary = decision_boundary
         self.obj_func = obj_func
         self.generation_size = int(generation_size)
-        self.selection_rate = selection_rate
+        self.selection_rate = selection_rate  # applies only to singe-objective
         self.mutation_rate = mutation_rate
         self.crossval_fold = int(crossval_fold)
         self.max_generation = int(max_generation)
@@ -36,69 +40,179 @@ class my_GA:
         self.life = self.max_life
         self.iter = 0
         self.generation = []
-        self.best = None # for single objective only
+        self.pf_best = []
         self.evaluated = {None: -1}
 
     def initialize(self):
         # Randomly generate generation_size points to self.generation
-        # write your own code below
 
-
+        self.generation = []
+        for _ in range(self.generation_size):
+            x = []
+            for decision in self.decision_boundary:
+                if type(decision) == list:
+                    x.append(np.random.random() * (decision[1] - decision[0]) + decision[0])
+                else:
+                    x.append(decision[np.random.randint(len(decision))])
+            self.generation.append(tuple(x))
         ######################
         # check if size of generation is correct
-        assert(len(self.generation) == self.generation_size)
+        assert (len(self.generation) == self.generation_size)
+        return self.generation
 
     def evaluate(self, decision):
         # Evaluate a certain point
         # decision: tuple of decisions
         # Avoid repetitive evaluations
         if decision not in self.evaluated:
-            # evaluate with self.crossval_fold fold cross-validation on self.data_X and self.data_y            
+            # evaluate with self.crossval_fold fold cross-validation on self.data_X and self.data_y
             clf = self.model(*decision)
             # write your own code below
-            objs = self.obj_func(predictions, actuals, pred_proba)
-            ######################
+            # Cross validation:
+            indices = [i for i in range(len(self.data_y))]
+            np.random.shuffle(indices)
+            size = int(np.ceil(len(self.data_y) / float(self.crossval_fold)))
+            objs_crossval = None
+            for fold in range(self.crossval_fold):
+                start = int(fold * size)
+                end = start + size
+                test_indices = indices[start:end]
+                train_indices = np.setdiff1d(indices,test_indices)
+                X_train = self.data_X.loc[train_indices]
+                X_train.index = range(len(X_train))
+                X_test = self.data_X.loc[test_indices]
+                X_test.index = range(len(X_test))
+                y_train = self.data_y.loc[train_indices]
+                y_train.index = range(len(y_train))
+                y_test = self.data_y.loc[test_indices]
+                y_test.index = range(len(y_test))
+                clf.fit(X_train, y_train)
+                predictions = clf.predict(X_test)
+                pred_proba = clf.predict_proba(X_test)
+                actuals = y_test
+                objs = np.array(self.obj_func(predictions, actuals, pred_proba))
+                if type(objs_crossval) == type(None):
+                    objs_crossval = objs
+                else:
+                    objs_crossval += objs
+
+            objs_crossval = objs_crossval / float(self.crossval_fold)
             self.evaluated[decision] = objs_crossval
         return self.evaluated[decision]
 
-    def selection(self):
+    def is_better(self, a, b):
+        # Check if decision a binary dominates decision b
+        # Return 0 if a == b,
+        # Return 1 if a binary dominates b,
+        # Return -1 if a does not binary dominates b.
+        if a == b:
+            return 0
+        obj_a = self.evaluate(a)
+        #print(obj_a)
+        obj_b = self.evaluate(b)
+        #print(obj_b)
+        # write your own code below
+        temp = []
+        if(x>=y for x,y in zip(range(len(obj_a),len(obj_b)))):
+            for i in range(len(obj_a)):
+                if(obj_a[i]>obj_b[i]):
+                    temp.append(2)
+                if(2 in temp):
+                    return 1
+                else:
+                    return -1
+
+    def compete(self, pf_new, pf_best):
+        # Compare and merge two pareto frontiers
+        # If one point y in pf_best is binary dominated by another point x in pf_new
+        # (exist x and y; self.is_better(x, y) == 1)
+        # replace that point y in pf_best with the point x in pf_new
+        # If one point x in pf_new is not dominated by any point y in pf_best (and does not exist in pf_best)
+        # (forall y in pf_best; self.is_better(y, x) == -1)
+        # add that point x to pf_best
+        # Return True if pf_best is modified in the process, otherwise return False
+        # Write your own code below
+        modified = False
+        for i in range(len(pf_best)):
+            for j in range(len(pf_new)):
+                if(self.is_better(pf_new[j], pf_best[i]) == 1):
+                    pf_best[i] = pf_new[j]
+                    pf_new.pop(j)
+                    modified = True
+                    break
+        to_add = []
+        for j in range(len(pf_new)):
+            not_dominated = True
+            for i in range(len(pf_best)):
+                if(self.is_better(pf_best[i],pf_new[j]) == -1):
+                    not_dominated = False
+                    break
+            if not_dominated:
+                to_add.append(j)
+                modified = True
+        for j in to_add:
+            pf_best.append(pf_new[j])
+        return modified
+
+    def select(self):
         # Select which points will survive based on the objectives
-        # Evaluate all points in current generation
-        objs = [self.evaluate(decision) for decision in self.generation]
-        if len(objs[0]) == 1:
-            objs = [obj[0] for obj in objs]
-        if type(objs[0])==list:
-            # multi-objective, binary domination, all undominated points survive
-            # update self.generation
-            # write your own code below
+        # Update the following:
+        # self.pf = pareto frontier (undominated points from self.generation)
+        # self.generation = survived points
 
-            ###############
-            # For multi-objective, if generation stays unchanged, reduce life
-            if len(self.generation)==self.generation_size:
-                self.life -= 1
-            else:
-                self.life = self.max_life
+        # single-objective:
+        if len(self.evaluate(self.generation[0])) == 1:
+            selected = np.argsort([self.evaluate(x)[0] for x in self.generation])[::-1][
+                       :int(np.ceil(self.selection_rate * self.generation_size))]
+            self.pf = [self.generation[selected[0]]]
+            self.generation = [self.generation[i] for i in selected]
+        # multi-objective:
         else:
-            # single objective, keep top self.selection_rate * self.generation_size points
-            # update self.generation and self.best
-            # write your own code below
-
-            ################
-            # For single objective, if best point stays unchanged, reduce life
-            if self.evaluate(new_best) <= self.evaluate(self.best):
-                self.life -= 1
+            self.pf = []
+            for x in self.generation:
+                if not np.array([self.is_better(y, x) == 1 for y in self.generation]).any():
+                    self.pf.append(x)
+            # remove duplicates
+            self.pf = list(set(self.pf))
+            # Add second batch undominated points into next generation if only one point in self.pf
+            if len(self.pf) == 1:
+                self.generation.remove(self.pf[0])
+                next_pf = []
+                for x in self.generation:
+                    if not np.array([self.is_better(y, x) == 1 for y in self.generation]).any():
+                        next_pf.append(x)
+                next_pf = list(set(next_pf))
+                self.generation = self.pf + next_pf
             else:
-                self.best = new_best
-                self.life = self.max_life
-        self.iter += 1
-        return
+                self.generation = self.pf[:]
 
     def crossover(self):
         # randomly select two points in self.generation
-        # and generate a new point, add it to self.generation
-        # repeat until len(self.generation) == self.generation_size
-        # write your own code below
-        return
+        # and generate a new point
+        # repeat until self.generation_size points were generated
+        # Write your own code below
+        def cross(a, b):
+            
+            
+            new_point = []
+            for i in range(len(a)):
+                p = random.choice([0,1])
+                if (p==0):
+                    new_point.append(a[i])
+                else:
+                    new_point.append(b[i])
+            return tuple(new_point)
+
+        to_add = []
+        for _ in range(self.generation_size - len(self.generation)):
+            ids = np.random.choice(len(self.generation), 2, replace=False)
+            new_point = cross(self.generation[ids[0]], self.generation[ids[1]])
+            to_add.append(new_point)
+        self.generation.extend(to_add)
+        ######################
+        # check if size of generation is correct
+        assert (len(self.generation) == self.generation_size)
+        return self.generation
 
     def mutate(self):
         # Uniform random mutation:
@@ -106,18 +220,34 @@ class my_GA:
         # has the same probability self.mutation_rate of being mutated
         # to a random valid value
         # write your own code below
-        return
+
+        for i, x in enumerate(self.generation):
+            new_x = list(x)
+            for j in range(len(x)):
+                if np.random.random() < self.mutation_rate:
+                    decision = self.decision_boundary[j]
+                    if type(decision) == list:
+                        new_x[j] = np.random.random() * (decision[1] - decision[0]) + decision[0]
+                    else:
+                        new_x[j] = decision[np.random.randint(len(decision))]
+            self.generation[i] = tuple(new_x)
+        return self.generation
 
     def tune(self):
         # Main function of my_GA
         # Stop when self.iter == self.max_generation or self.life == 0
-        # write your own code below
-
-        ###################
-        if self.best:
-            return self.best
-        else:
-            return self.generation
+        # Return the best pareto frontier pf_best (list of decisions that never get binary dominated by any candidate evaluated)
+        self.initialize()
+        while self.life > 0 and self.iter < self.max_generation:
+            self.select()
+            if self.compete(self.pf, self.pf_best):
+                self.life = self.max_life
+            else:
+                self.life -= 1
+            self.iter += 1
+            self.crossover()
+            self.mutate()
+        return self.pf_best
 
 
 
