@@ -113,14 +113,13 @@ class my_GA:
         #print(obj_b)
         # write your own code below
         temp = []
-        if(x>=y for x,y in zip(range(len(obj_a),len(obj_b)))):
-            for i in range(len(obj_a)):
-                if(obj_a[i]>obj_b[i]):
-                    temp.append(2)
-                if(2 in temp):
-                    return 1
-                else:
-                    return -1
+        for i in range(0,len(obj_a),1):
+            if(obj_a[i]>obj_b[i]):
+                temp.append(2)
+        if(all(obj_a)>=all(obj_b) and any(obj_a)>any(obj_b)):
+            return 1
+        else:
+            return -1
 
     def compete(self, pf_new, pf_best):
         # Compare and merge two pareto frontiers
