@@ -35,11 +35,12 @@ class my_model():
         y2 = y.iloc[d]
         final = pd.concat([c,e])
         yf = pd.concat([y1,y2])
+        final['description'] = final['description']+''+final['title']
         final = final.drop(["title","location"],axis=1)
         final["description"] = final["description"].apply(preprocess)
         final["requirements"] = final["requirements"].apply(preprocess)
-        self.tfvec1 = TfidfVectorizer(max_features = 2000,use_idf=False, smooth_idf=False)
-        self.tfvec2 = TfidfVectorizer(max_features = 2000,use_idf=False, smooth_idf=False)
+        self.tfvec1 = TfidfVectorizer(stop_words='english',use_idf=True, smooth_idf=True, max_df=0.3, sublinear_tf=True,norm='l2')
+        self.tfvec2 = TfidfVectorizer(stop_words='english',use_idf=True, smooth_idf=True, max_df=0.3, sublinear_tf=True,norm='l2')
         #self.preprocessor.fit(X['description'])
         self.tfvec1.fit(final["description"])
         self.tfvec2.fit(final["requirements"])
@@ -51,6 +52,7 @@ class my_model():
         return
 
     def predict(self, X):
+        X['description'] = X['description']+''+X['title']
         X1 = X.drop(["title","location"],axis=1)
         final = pd.DataFrame()
         final["description"] = X["description"].apply(preprocess)
@@ -59,9 +61,5 @@ class my_model():
         x_testvec_2 = self.tfvec2.transform(final['requirements'])
         final_x = pd.concat([pd.DataFrame(x_testvec_1.todense()),pd.DataFrame(x_testvec_2.todense())],axis=1)
         final_x = final_x.fillna("")
-        predictions = self.clf.predict(final_x)
+        predictions = self.clf.predict(final_x)#forloop it to get good answer
         return predictions
-
-
-
-
