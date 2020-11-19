@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils import resample
 from gensim.parsing.porter import PorterStemmer
+from sklearn.linear_model import SGDClassifier
 
 def preprocess(text):
     ps = PorterStemmer()
@@ -47,7 +48,7 @@ class my_model():
         x_trainvec_1 = self.tfvec1.transform(final["description"])
         x_trainvec_2 = self.tfvec2.transform(final['requirements'])
         final_x = pd.concat([pd.DataFrame(x_trainvec_1.todense()),pd.DataFrame(x_trainvec_2.todense())],axis=1)
-        self.clf = RandomForestClassifier(n_jobs=5,n_estimators=100,criterion="entropy")
+        self.clf = SGDClassifier(class_weight="balanced",max_iter=3000,random_state=420)
         self.clf.fit(final_x, yf)
         return
 
