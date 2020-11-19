@@ -27,7 +27,7 @@ def preprocess(text):
 class my_model():
     def fit(self, X, y):
         a = X.loc[y==0].index.values
-        b = resample(a, n_samples=1300, random_state=0)
+        b = resample(a, n_samples=1000, random_state=0)
         c = X.iloc[b]
         y1 = y.iloc[b]
         d = X.loc[y==1].index.values
@@ -45,11 +45,8 @@ class my_model():
         self.tfvec2.fit(final["requirements"])
         x_trainvec_1 = self.tfvec1.transform(final["description"])
         x_trainvec_2 = self.tfvec2.transform(final['requirements'])
-        x_trainvec_1_f = pd.DataFrame(x_trainvec_1.todense())
-        x_trainvec_2_f = pd.DataFrame(x_trainvec_2.todense())
-        final = final.drop(["description","requirements"],axis=1)
-        final_x = pd.concat([x_trainvec_1_f,x_trainvec_2_f],axis=1)
-        self.clf = RandomForestClassifier(n_jobs=5,n_estimators=100,criterion="gini")
+        final_x = pd.concat([pd.DataFrame(x_trainvec_1.todense()),pd.DataFrame(x_trainvec_2.todense())],axis=1)
+        self.clf = RandomForestClassifier(n_jobs=5,n_estimators=100,criterion="entropy")
         self.clf.fit(final_x, yf)
         return
 
@@ -58,12 +55,9 @@ class my_model():
         final = pd.DataFrame()
         final["description"] = X["description"].apply(preprocess)
         final["requirements"] = X["requirements"].apply(preprocess)
-        x_testvec_1 = self.tfvec1.transform(X1["description"])
-        x_testvec_2 = self.tfvec2.transform(X['requirements'])
-        x_testvec_1_f = pd.DataFrame(x_testvec_1.todense())
-        x_testvec_2_f = pd.DataFrame(x_testvec_2.todense())
-        fin = X1.drop(["description","requirements"],axis=1)
-        final_x = pd.concat([x_testvec_1_f,x_testvec_2_f],axis=1)
+        x_testvec_1 = self.tfvec1.transform(final["description"])
+        x_testvec_2 = self.tfvec2.transform(final['requirements'])
+        final_x = pd.concat([pd.DataFrame(x_testvec_1.todense()),pd.DataFrame(x_testvec_2.todense())],axis=1)
         final_x = final_x.fillna("")
         predictions = self.clf.predict(final_x)
         return predictions
