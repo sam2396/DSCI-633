@@ -27,39 +27,31 @@ def preprocess(text):
 
 class my_model():
     def fit(self, X, y):
-        a = X.loc[y==0].index.values
-        b = resample(a, n_samples=1000, random_state=0)
-        c = X.iloc[b]
-        y1 = y.iloc[b]
-        d = X.loc[y==1].index.values
-        e = X.iloc[d]
-        y2 = y.iloc[d]
-        final = pd.concat([c,e])
-        yf = pd.concat([y1,y2])
+        final = X
         final['description'] = final['description']+''+final['title']
         final = final.drop(["title","location"],axis=1)
-        final["description"] = final["description"].apply(preprocess)
-        final["requirements"] = final["requirements"].apply(preprocess)
+        ct1 = final["description"].apply(preprocess)
+        ct2 = final["requirements"].apply(preprocess)
         self.tfvec1 = TfidfVectorizer(stop_words='english',use_idf=True, smooth_idf=True, max_df=0.3, sublinear_tf=True,norm='l2')
         self.tfvec2 = TfidfVectorizer(stop_words='english',use_idf=True, smooth_idf=True, max_df=0.3, sublinear_tf=True,norm='l2')
         #self.preprocessor.fit(X['description'])
-        self.tfvec1.fit(final["description"])
-        self.tfvec2.fit(final["requirements"])
+        self.tfvec1.fit(ct1)
+        self.tfvec2.fit(ct2)
         x_trainvec_1 = self.tfvec1.transform(final["description"])
         x_trainvec_2 = self.tfvec2.transform(final['requirements'])
         final_x = pd.concat([pd.DataFrame(x_trainvec_1.todense()),pd.DataFrame(x_trainvec_2.todense())],axis=1)
-        self.clf = SGDClassifier(class_weight="balanced",max_iter=3000,random_state=420)
-        self.clf.fit(final_x, yf)
+        self.clf = SGDClassifier(class_weight="balanced",max_iter=3000,random_state=421)
+        self.clf.fit(final_x, y)
         return
 
     def predict(self, X):
         X['description'] = X['description']+''+X['title']
         X1 = X.drop(["title","location"],axis=1)
         final = pd.DataFrame()
-        final["description"] = X["description"].apply(preprocess)
-        final["requirements"] = X["requirements"].apply(preprocess)
-        x_testvec_1 = self.tfvec1.transform(final["description"])
-        x_testvec_2 = self.tfvec2.transform(final['requirements'])
+        pt1 = X["description"].apply(preprocess)
+        pt2 = X["requirements"].apply(preprocess)
+        x_testvec_1 = self.tfvec1.transform(pt1)
+        x_testvec_2 = self.tfvec2.transform(pt2)
         final_x = pd.concat([pd.DataFrame(x_testvec_1.todense()),pd.DataFrame(x_testvec_2.todense())],axis=1)
         final_x = final_x.fillna("")
         predictions = self.clf.predict(final_x)#forloop it to get good answer
