@@ -6,6 +6,7 @@ from assignment8.my_evaluation import my_evaluation
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import gensim
+from gensim.parsing.preprocessing import strip_punctuation,strip_punctuation2,strip_tags,strip_numeric
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -16,6 +17,10 @@ from sklearn.linear_model import SGDClassifier
 def preprocess(text):
     ps = PorterStemmer()
     default_stopwords=gensim.parsing.preprocessing.STOPWORDS
+    text = strip_tags(text)
+    text = strip_punctuation(text)
+    text = strip_punctuation2(text)
+    text = strip_numeric(text)
     split = text.split()
     for word in split :
         if word in default_stopwords :
@@ -40,7 +45,7 @@ class my_model():
         x_trainvec_1 = self.tfvec1.transform(ct1)
         x_trainvec_2 = self.tfvec2.transform(ct2)
         final_x = pd.concat([pd.DataFrame(x_trainvec_1.todense()),pd.DataFrame(x_trainvec_2.todense())],axis=1)
-        self.clf = SGDClassifier(class_weight="balanced",max_iter=3000,random_state=421)
+        self.clf = SGDClassifier(class_weight="balanced",max_iter=3000,random_state=42)
         self.clf.fit(final_x, y)
         return
 
